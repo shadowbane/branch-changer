@@ -25,3 +25,18 @@ jobs:
           GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version={{version}}'" -o builds/branch-changer-linux-amd64 .
           GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version={{version}}'" -o builds/branch-changer-darwin-arm64 .
           ls -lah builds
+
+      - name: Extract release notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v1
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: ${{ steps.extract-release-notes.outputs.release_notes }}
+          files: |
+            builds/branch-changer-linux-amd64
+            builds/branch-changer-darwin-arm64
+          draft: false
+          prerelease: false
