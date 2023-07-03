@@ -5,9 +5,16 @@
 ██   ██ ██   ██ ██   ██ ██  ██ ██ ██      ██   ██     ██      ██   ██ ██   ██ ██  ██ ██ ██    ██ ██      ██   ██
 ██████  ██   ██ ██   ██ ██   ████  ██████ ██   ██      ██████ ██   ██ ██   ██ ██   ████  ██████  ███████ ██   ██
 #  
-#  Version:      development
+#  Version:      v1.0.0
 #  Maintainer:   Adli I. Ifkar <adly.shadowbane@gmail.com>
 ```
+
+[![Go](https://img.shields.io/badge/Go-00ADD8?logo=go&logoColor=white&style=flat-square)](https://golang.org/)
+[![License: GPL v3](https://img.shields.io/badge/license-MIT-blue?style=flat-square&label=License)](LICENSE)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/shadowbane/branch-changer/build.yml?logo=githubactions&style=flat-square&label=Build%20Status)
+![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/shadowbane/branch-changer?include_prereleases&style=flat-square&logo=git&label=Latest%20Tag)
+![GitHub all releases](https://img.shields.io/github/downloads/shadowbane/branch-changer/total?style=flat-square&label=Total%20Downloads)
+
 
 # Branch Changer
 
@@ -19,14 +26,10 @@ You could easily run a bash script, but like I said, I'm bored and I want to mak
 
 ## Usage
 
-### Linux / MacOS Intel Silicon
-
-
-### MacOS Apple Silicon
-
+Download from [release page](https://github.com/shadowbane/branch-changer/releases/latest) and run it from console.
 
 ### Windows
-Sadly, I don't have Windows machine to test this script. But, I think it should work on Windows 10 with WSL2.
+Sadly, I don't have Windows machine to test this script. But, I think it should work on Windows 10/11 with WSL2.
 
 ### Parameters
 ```bash
@@ -46,7 +49,6 @@ Usage of ./branch-changer:
   -workdir string
         Working directory
 ```
-
 - `-failedonly` : Load failed projects only
 - `-force` : Force switch branch (stash changes before changing branch)
 - `-from` : Branch to merge from (or, source branch)
@@ -63,6 +65,9 @@ Also, you could use `-failedonly` parameter to load only failed projects.
 ```bash
 branch-changer --workdir /path/to/working/directory --failedonly
 ```
+
+## To Do
+- Add tests
 
 # License
 MIT License
