@@ -5,7 +5,7 @@
 ██   ██ ██   ██ ██   ██ ██  ██ ██ ██      ██   ██     ██      ██   ██ ██   ██ ██  ██ ██ ██    ██ ██      ██   ██
 ██████  ██   ██ ██   ██ ██   ████  ██████ ██   ██      ██████ ██   ██ ██   ██ ██   ████  ██████  ███████ ██   ██
 #  
-#  Version:      v1.0.0
+#  Version:      v1.0.1
 #  Maintainer:   Adli I. Ifkar <adly.shadowbane@gmail.com>
 ```
 
@@ -27,6 +27,18 @@ You could easily run a bash script, but like I said, I'm bored and I want to mak
 ## Usage
 
 Download from [release page](https://github.com/shadowbane/branch-changer/releases/latest) and run it from console.
+
+### Linux & Intel MacOS
+```bash
+$ wget -c https://github.com/shadowbane/branch-changer/releases/latest/download/branch-changer-linux-amd64 -o /usr/bin/branch-changer
+$ sudo chmod +x /usr/bin/branch-changer
+```
+
+### Apple Silicon MacOS
+```bash
+$ wget -c https://github.com/shadowbane/branch-changer/releases/latest/download/branch-changer-darwin-arm64 -o /usr/bin/branch-changer
+$ sudo chmod +x /usr/bin/branch-changer
+```
 
 ### Windows
 Sadly, I don't have Windows machine to test this script. But, I think it should work on Windows 10/11 with WSL2.

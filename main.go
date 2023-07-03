@@ -28,7 +28,7 @@ var projects = []string{
 	"clickargo-microservice-inttra",
 	"clickargo-microservice-logs",
 	"clickargo-microservice-order",
-	"clickargo-microservice-shell",
+	"clickargo-microservice-sg-shell",
 	"clickargo-microservice-shipment",
 	"clickargo-microservice-tds",
 	"clickargo-microservice-terminal-operator",
