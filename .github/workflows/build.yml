@@ -1,0 +1,26 @@
+name: "autobuild"
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
+      - name: Install dependencies
+        run: go get .
+
+      - name: Build
+        run: |
+          go version
+          pwd
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version={{version}}'" -o builds/branch-changer-linux-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version={{version}}'" -o builds/branch-changer-darwin-arm64 .
