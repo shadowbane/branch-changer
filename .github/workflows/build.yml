@@ -25,12 +25,11 @@ jobs:
       - name: Build
         env:
           RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-
         run: |
           go version
           pwd
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version={{RELEASE_VERSION}}'" -o builds/branch-changer-linux-amd64 .
-          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version={{RELEASE_VERSION}}'" -o builds/branch-changer-darwin-arm64 .
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version=${RELEASE_VERSION}'" -o builds/branch-changer-linux-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version=${RELEASE_VERSION}'" -o builds/branch-changer-darwin-arm64 .
           ls -lah builds
 
       - name: Extract release notes
