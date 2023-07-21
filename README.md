@@ -5,7 +5,7 @@
 ██   ██ ██   ██ ██   ██ ██  ██ ██ ██      ██   ██     ██      ██   ██ ██   ██ ██  ██ ██ ██    ██ ██      ██   ██
 ██████  ██   ██ ██   ██ ██   ████  ██████ ██   ██      ██████ ██   ██ ██   ██ ██   ████  ██████  ███████ ██   ██
 #  
-#  Version:      v1.0.1
+#  Version:      v1.1.0
 #  Maintainer:   Adli I. Ifkar <adly.shadowbane@gmail.com>
 ```
 
@@ -15,6 +15,7 @@
 ![GitHub tag (latest SemVer pre-release)](https://img.shields.io/github/v/tag/shadowbane/branch-changer?include_prereleases&style=flat-square&logo=git&label=Latest%20Tag)
 ![GitHub all releases](https://img.shields.io/github/downloads/shadowbane/branch-changer/total?style=flat-square&label=Total%20Downloads)
 
+# [Changelog](CHANGELOG.md)
 
 # Branch Changer
 

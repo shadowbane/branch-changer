@@ -3,44 +3,19 @@ package main
 import (
 	"bufio"
 	"flag"
+	"github.com/samber/oops"
 	"github.com/shadowbane/go-logger"
 	"go.uber.org/zap"
 	"os"
 	"strings"
-	"sync"
 )
 
-var projects = []string{
-	"clickargo-docker-compose-config",
-	"clickargo-file-manager",
-	"clickargo-id-tds-finance",
-	"clickargo-microservice-bank-va",
-	"clickargo-microservice-company",
-	"clickargo-microservice-company-api",
-	"clickargo-microservice-container",
-	"clickargo-microservice-dashboard",
-	"clickargo-microservice-domestic",
-	"clickargo-microservice-excel-csv-uploader",
-	"clickargo-microservice-export",
-	"clickargo-microservice-finance",
-	"clickargo-microservice-gateway",
-	"clickargo-microservice-import",
-	"clickargo-microservice-inttra",
-	"clickargo-microservice-logs",
-	"clickargo-microservice-order",
-	"clickargo-microservice-sg-shell",
-	"clickargo-microservice-shipment",
-	"clickargo-microservice-tds",
-	"clickargo-microservice-terminal-operator",
-	"clickargo-microservice-truck",
-	"clickargo-view-blade",
-	"clickargo-view-trucking",
-}
+var projects []string
 var notFoundProjects []string
 var errProjects []string
-var workingDir = "/var/www"
-var branchFrom = "development-new"
-var branchTo = "development-sg"
+var workingDir = ""
+var branchFrom = ""
+var branchTo = ""
 var push = false
 var force = false
 
@@ -48,26 +23,15 @@ var Version = "development"
 var Maintainer = "Adli I. Ifkar <adly.shadowbane@gmail.com>"
 
 func main() {
-	printHeader()
-	parseFlags()
-
 	// set environment variables
 	_ = os.Setenv("LOG_FILE_ENABLED", "true")
 
 	logger.Init(logger.LoadEnvForLogger())
 
-	zap.S().Infof("Branch from: %s", branchFrom)
-	zap.S().Infof("Branch to: %s", branchTo)
-	zap.S().Infof("Working directory: %s", workingDir)
-	zap.S().Infof("Projects: %s", projects)
-
-	zap.S().Warn("Application set to push to remote repository")
-	zap.S().Warn("Application set to stash changes before switching branch")
+	printHeader()
+	parseFlags()
 
 	zap.S().Info("Starting application...")
-
-	// create wait group
-	wg := sync.WaitGroup{}
 
 	for _, project := range projects {
 		err := os.Chdir(workingDir + "/" + project)
@@ -75,12 +39,9 @@ func main() {
 			notFoundProjects = append(notFoundProjects, project)
 			zap.S().Warnf("%s/%s does not exists! Please make sure the directory exists before continuing", workingDir, project)
 		} else {
-			wg.Add(1)
-			switchBranch(project, &wg)
+			switchBranch(project)
 		}
 	}
-
-	wg.Wait()
 
 	// Print errors for not found projects
 	if len(notFoundProjects) > 0 {
@@ -132,6 +93,8 @@ func writeToFile(filename string) error {
 }
 
 func parseFlags() {
+	var err error
+
 	// get input for branchFrom
 	inputBranchFrom := flag.String("from", "", "Branch to merge from")
 	inputBranchTo := flag.String("to", "", "Branch to merge to")
@@ -146,24 +109,72 @@ func parseFlags() {
 
 	if *inputBranchFrom != "" {
 		branchFrom = *inputBranchFrom
+	} else {
+		if branchFrom == "" {
+			err = oops.
+				In("ParseFlags").
+				Hint("Please use --from to specify branch from").
+				Errorf("branch from is required")
+		}
 	}
 
 	if *inputBranchTo != "" {
 		branchTo = *inputBranchTo
+	} else {
+		if branchTo == "" {
+			err = oops.
+				In("ParseFlags").
+				Hint("Please use --to to specify branch to").
+				Errorf("branch to is required")
+		}
 	}
 
 	if *inputWorkDir != "" {
 		workingDir = *inputWorkDir
+	} else {
+		if workingDir == "" {
+			err = oops.
+				In("ParseFlags").
+				Hint("Please use --workdir to specify working directory").
+				Errorf("working directory not specified")
+		}
 	}
 
 	if *inputProjects != "" {
 		// separate projects by comma
 		projects = strings.Split(*inputProjects, ",")
+	} else {
+		if len(projects) == 0 {
+			err = oops.
+				In("ParseFlags").
+				Hint("Please use --projects to specify project. Example: directory-a,some-directory").
+				Errorf("projects not specified")
+		}
 	}
 
 	if *inputLoadFailedOnly {
 		// load failed projects from file
 		projects = loadFailedProjects(workingDir + "/failed.txt")
+	}
+
+	if err != nil {
+		zap.S().Errorf("[%s] %s", err.(oops.OopsError).Domain(), err.(oops.OopsError).Stacktrace())
+		zap.S().Infof("Hint: %s", err.(oops.OopsError).Hint())
+
+		os.Exit(2)
+	}
+
+	zap.S().Infof("Branch from: %s", branchFrom)
+	zap.S().Infof("Branch to: %s", branchTo)
+	zap.S().Infof("Working directory: %s", workingDir)
+	zap.S().Infof("Projects: %s", projects)
+
+	if push {
+		zap.S().Warn("Application set to push to remote repository")
+	}
+
+	if force {
+		zap.S().Warn("Application set to stash changes before switching branch")
 	}
 
 	push = *inputWithPush
@@ -195,8 +206,8 @@ func loadFailedProjects(filename string) []string {
 	return projects
 }
 
-func switchBranch(projectName string, wg *sync.WaitGroup) {
-	defer handleErrors(projectName, wg)
+func switchBranch(projectName string) {
+	defer handleErrors(projectName)
 
 	chDir(projectName)
 	zap.S().Infof("%s Current directory: %s", projectName, getCwd())
@@ -212,9 +223,11 @@ func switchBranch(projectName string, wg *sync.WaitGroup) {
 	}
 
 	if branchExist(projectName, branchTo) {
-		if currBranch != branchTo {
-			checkoutBranch(projectName, branchTo)
-		}
+		checkoutBranch(projectName, branchFrom)
+
+		pullRepo(projectName)
+
+		checkoutBranch(projectName, branchTo)
 
 		if checkTrackedBranch(projectName, branchTo) {
 			setTrackedBranch(projectName, branchTo)
@@ -239,8 +252,6 @@ func switchBranch(projectName string, wg *sync.WaitGroup) {
 	}
 
 	zap.S().Infof("%s/%s switched to %s", workingDir, projectName, branchTo)
-
-	wg.Done()
 }
 
 func chDir(projectName string) {
@@ -261,11 +272,10 @@ func getCwd() string {
 	return currDir
 }
 
-func handleErrors(projectName string, wg *sync.WaitGroup) {
+func handleErrors(projectName string) {
 	if r := recover(); r != nil {
 		errProjects = append(errProjects, projectName)
 		zap.S().Debugf("Recovered from error")
 		//zap.S().Debugf("Recovered from %s", r)
-		wg.Done()
 	}
 }
