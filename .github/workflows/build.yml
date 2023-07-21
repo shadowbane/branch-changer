@@ -10,6 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set output
+        id: vars
+        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -19,11 +23,14 @@ jobs:
         run: go get .
 
       - name: Build
+        env:
+          RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+
         run: |
           go version
           pwd
-          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version={{version}}'" -o builds/branch-changer-linux-amd64 .
-          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version={{version}}'" -o builds/branch-changer-darwin-arm64 .
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X 'main.Version={{RELEASE_VERSION}}'" -o builds/branch-changer-linux-amd64 .
+          GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w -X 'main.Version={{RELEASE_VERSION}}'" -o builds/branch-changer-darwin-arm64 .
           ls -lah builds
 
       - name: Extract release notes
