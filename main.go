@@ -18,6 +18,7 @@ var branchFrom = ""
 var branchTo = ""
 var push = false
 var force = false
+var merge = false
 
 var Version = "development"
 var Maintainer = "Adli I. Ifkar <adly.shadowbane@gmail.com>"
@@ -96,14 +97,15 @@ func parseFlags() {
 	var err error
 
 	// get input for branchFrom
-	inputBranchFrom := flag.String("from", "", "Branch to merge from")
-	inputBranchTo := flag.String("to", "", "Branch to merge to")
+	inputBranchFrom := flag.String("source", "", "Branch to merge from")
+	inputBranchTo := flag.String("destination", "", "Branch to merge to")
 	inputWorkDir := flag.String("workdir", "", "Working directory")
 	inputProjects := flag.String("projects", "", "Projects to merge")
 
 	inputLoadFailedOnly := flag.Bool("failedonly", false, "Load failed projects only")
 	inputWithPush := flag.Bool("push", false, "Push newly create branch to remote")
 	inputForce := flag.Bool("force", false, "Force switch branch (stash changes)")
+	inputMerge := flag.Bool("merge", false, "Merge 'source' to 'destination' (default: true)")
 
 	flag.Parse()
 
@@ -164,6 +166,10 @@ func parseFlags() {
 		os.Exit(2)
 	}
 
+	push = *inputWithPush
+	force = *inputForce
+	merge = *inputMerge
+
 	zap.S().Infof("Branch from: %s", branchFrom)
 	zap.S().Infof("Branch to: %s", branchTo)
 	zap.S().Infof("Working directory: %s", workingDir)
@@ -177,8 +183,9 @@ func parseFlags() {
 		zap.S().Warn("Application set to stash changes before switching branch")
 	}
 
-	push = *inputWithPush
-	force = *inputForce
+	if merge {
+		zap.S().Warn("Application set to merge 'source' to 'destination' branch")
+	}
 }
 
 func loadFailedProjects(filename string) []string {
@@ -234,7 +241,9 @@ func switchBranch(projectName string) {
 			pullRepo(projectName)
 		}
 
-		mergeRepo(projectName, branchFrom, branchTo)
+		if merge {
+			mergeRepo(projectName, branchFrom, branchTo)
+		}
 
 		if push {
 			pushRepo(projectName, branchTo, !checkTrackedBranch(projectName, branchTo))
